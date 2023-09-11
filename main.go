@@ -47,15 +47,19 @@ func main() {
 	scanner.Scan()
 	name := scanner.Text()
 
+	fmt.Print("enter room name: ")
+	scanner.Scan()
+	topic := scanner.Text()
+
 	client := getClient(name)
 
-	sub(client)
-	publish(client, scanner, name)
+	sub(client, topic)
+	publish(client, scanner, name, topic)
 
 	client.Disconnect(250)
 }
 
-func publish(client mqtt.Client, scanner *bufio.Scanner, name string) {
+func publish(client mqtt.Client, scanner *bufio.Scanner, name string, topic string) {
 	isAlive := true
 	for isAlive {
 		fmt.Print("\nEnter some text: ")
@@ -69,14 +73,13 @@ func publish(client mqtt.Client, scanner *bufio.Scanner, name string) {
 		
 		message := name + ": " + userInput
 		
-		token := client.Publish("didi-topic", 0, false, message)
+		token := client.Publish(topic, 0, false, message)
 		token.Wait()
 		time.Sleep(time.Second)
 	}
 }
 
-func sub(client mqtt.Client) {
-	topic := "didi-topic"
+func sub(client mqtt.Client, topic string) {
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
 	fmt.Printf("Subcribed to topic: %s\n", topic)
