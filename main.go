@@ -40,19 +40,18 @@ func getClient(name string) mqtt.Client {
 	return client
 }
 
+func getUserInput(scanner *bufio.Scanner, message string) string {
+	fmt.Print(message + ": ")
+	scanner.Scan()
+	return scanner.Text()
+}
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Print("enter name: ")
-	scanner.Scan()
-	name := scanner.Text()
-
-	fmt.Print("enter room name: ")
-	scanner.Scan()
-	topic := scanner.Text()
-
+	name := getUserInput(scanner, "enter name")
+	topic := getUserInput(scanner, "enter room name")
 	client := getClient(name)
-
+	
 	sub(client, topic)
 	publish(client, scanner, name, topic)
 
@@ -67,12 +66,10 @@ func publish(client mqtt.Client, scanner *bufio.Scanner, name string, topic stri
 		scanner.Scan()
 		userInput := scanner.Text()
 
-		if userInput == "n" {
-			isAlive = false
-		}
-		
+		if userInput == "n" { isAlive = false }
+
 		message := name + ": " + userInput
-		
+
 		token := client.Publish(topic, 0, false, message)
 		token.Wait()
 		time.Sleep(time.Second)
